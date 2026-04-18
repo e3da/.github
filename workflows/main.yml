@@ -1,0 +1,77 @@
+name: Organization Profile Updater
+
+on:
+  schedule:
+    # 16:10 UTC is 00:10 (12:10 AM) China Standard Time
+    - cron: '10 16 * * *'
+  workflow_dispatch: # Recommended for manual testing
+
+jobs:
+  update-members:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Member Table
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const org = 'e3da';
+            
+            // 1. Get all public members of the organization
+            const { data: members } = await github.rest.orgs.listPublicMembers({ org });
+            
+            let memberRows = "| Member | Portfolio |\n| :--- | :--- |\n";
+            let memberCount = 0;
+
+            for (const member of members) {
+              // 2. Check membership role
+              const { data: membership } = await github.rest.orgs.getMembershipForUser({
+                org,
+                username: member.login
+              });
+
+              // 3. Filter: Only include 'member' role (skips 'admin/owner')
+              if (membership.role === 'member') {
+                const { data: user } = await github.rest.users.getByUsername({ username: member.login });
+                
+                // Use profile 'blog' link if available, otherwise default to github.io
+                const site = user.blog ? user.blog : `https://${user.login}.github.io`;
+                const displayName = user.name || user.login;
+                
+                memberRows += `| **${displayName}** | [${site}](${site}) |\n`;
+                memberCount++;
+              }
+            }
+
+            if (memberCount === 0) {
+              memberRows += "| No public members found | - |\n";
+            }
+
+            // 4. Update the README file
+            const fs = require('fs');
+            const path = 'profile/README.md';
+            
+            if (fs.existsSync(path)) {
+              let content = fs.readFileSync(path, 'utf8');
+              const regex = /[\s\S]*/;
+              const replacement = `\n${memberRows}\n`;
+              
+              if (regex.test(content)) {
+                fs.writeFileSync(path, content.replace(regex, replacement));
+              } else {
+                console.log("Tags not found. Ensure README.md has the START and END comments.");
+              }
+            } else {
+              console.log("README.md not found in profile/ directory.");
+            }
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add profile/README.md
+          git commit -m "chore: auto-update e3da member portfolios" || echo "No changes to commit"
+          git push

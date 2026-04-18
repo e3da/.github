@@ -7,12 +7,10 @@ on:
   workflow_dispatch: 
 
 env:
-  # Mandatory for 2026 Node compatibility
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   update-members:
-    # Targeting the new cost-efficient 1-vCPU runner
     runs-on: ubuntu-slim
     steps:
       - name: Checkout repository
@@ -29,7 +27,7 @@ jobs:
             const fs = require('fs');
             
             async function run() {
-              // 1. Fetch all members with pagination
+              // 1. Fetch Members
               const members = await github.paginate(github.rest.orgs.listMembers, {
                 org: org,
                 filter: 'all',
@@ -45,7 +43,6 @@ jobs:
                   username: member.login
                 });
 
-                // Filter for 'member' role (skips admins/owners)
                 if (membership.role === 'member') {
                   const { data: user } = await github.rest.users.getByUsername({ username: member.login });
                   const site = user.blog ? user.blog : `https://${user.login}.github.io`;
@@ -58,17 +55,29 @@ jobs:
 
               if (count === 0) memberRows += "| No members found | - | - |\n";
 
-              // 2. Build README from Head file
+              // 2. Load Header and Compare
               const headPath = 'profile/RM-head.md';
               const readmePath = 'profile/README.md';
 
-              if (fs.existsSync(headPath)) {
-                const header = fs.readFileSync(headPath, 'utf8');
-                const finalContent = `${header}\n\n${memberRows}\n\n*Last updated: ${new Date().toUTCString()} (via ubuntu-slim)*`;
-                fs.writeFileSync(readmePath, finalContent);
-              } else {
-                console.error("RM-head.md not found. Rebuilding skipped.");
+              if (!fs.existsSync(headPath)) throw new Error("RM-head.md missing.");
+
+              const header = fs.readFileSync(headPath, 'utf8');
+              const newContent = `${header}\n\n${memberRows}\n\n*Last updated: ${new Date().toUTCString()} (via ubuntu-slim)*`;
+
+              // Check if file exists and compare content (ignoring the timestamp line for true data comparison)
+              if (fs.existsSync(readmePath)) {
+                const oldContent = fs.readFileSync(readmePath, 'utf8');
+                // We strip the "Last updated" line to see if the actual member data changed
+                const stripTime = (str) => str.split('*Last updated:')[0].trim();
+                
+                if (stripTime(oldContent) === stripTime(newContent)) {
+                  console.log("Member data remains unchanged. Skipping file write.");
+                  return; 
+                }
               }
+
+              fs.writeFileSync(readmePath, newContent);
+              console.log("Changes detected. README.md updated locally.");
             }
 
             await run();
@@ -80,11 +89,11 @@ jobs:
           
           git add profile/README.md
           
-          # Only push if the member list actually changed
+          # Final safety check: if no changes are staged, do not push
           if git diff --staged --quiet; then
-            echo "No changes in member list."
+            echo "No data changes detected. Skipping git push."
             exit 0
           fi
 
-          git commit -m "chore: nightly update via ubuntu-slim"
+          git commit -m "chore: nightly member update (data change detected)"
           git push origin main --force

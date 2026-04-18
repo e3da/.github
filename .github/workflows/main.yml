@@ -2,8 +2,8 @@ name: Organization Profile Updater
 
 on:
   schedule:
-    # 19:40 UTC is 03:40 AM China Standard Time
-    - cron: '40 19 * * *'
+    # Saturday 19:40 UTC is 03:40 AM China Standard Time
+    - cron: '40 19 * * 6'
   workflow_dispatch: 
 
 env:

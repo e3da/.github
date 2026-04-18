@@ -4,76 +4,84 @@ on:
   schedule:
     # 16:10 UTC is 00:10 (12:10 AM) China Standard Time
     - cron: '10 16 * * *'
-  workflow_dispatch: # Recommended for manual testing
+  workflow_dispatch: 
+
+env:
+  # Ensuring compatibility with Node 24 runners
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   update-members:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate Member Table
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
-          github-token: ${{ secrets.YRPENG_E3DA_RO }}
+          # Updated to your specific secret name
+          github-token: ${{ secrets.YRPENG_E3DA_RO }} 
           script: |
             const org = 'e3da';
             
-            // 1. Get all public members of the organization
-            const { data: members } = await github.rest.orgs.listPublicMembers({ org });
+            // Paginate through all members (public & private)
+            const members = await github.paginate(github.rest.orgs.listMembers, {
+              org: org,
+              filter: 'all',
+              per_page: 100
+            });
             
-            let memberRows = "| Member | Portfolio |\n| :--- | :--- |\n";
+            let memberRows = "| Member | Status | Portfolio |\n| :--- | :--- | :--- |\n";
             let memberCount = 0;
 
             for (const member of members) {
-              // 2. Check membership role
               const { data: membership } = await github.rest.orgs.getMembershipForUser({
                 org,
                 username: member.login
               });
 
-              // 3. Filter: Only include 'member' role (skips 'admin/owner')
+              // Excludes Owners/Admins to only show Members
               if (membership.role === 'member') {
                 const { data: user } = await github.rest.users.getByUsername({ username: member.login });
-                
-                // Use profile 'blog' link if available, otherwise default to github.io
                 const site = user.blog ? user.blog : `https://${user.login}.github.io`;
-                const displayName = user.name || user.login;
+                const status = user.status?.emoji ? `${user.status.emoji} ${user.status.message || ''}` : "Active";
                 
-                memberRows += `| **${displayName}** | [${site}](${site}) |\n`;
+                memberRows += `| **${user.name || user.login}** | ${status} | [Visit Portfolio](${site}) |\n`;
                 memberCount++;
               }
             }
 
-            if (memberCount === 0) {
-              memberRows += "| No public members found | - |\n";
-            }
+            if (memberCount === 0) memberRows += "| No members found | - | - |\n";
 
-            // 4. Update the README file
             const fs = require('fs');
-            const path = 'profile/README.md';
+            const path = 'profile/README.md'; 
             
             if (fs.existsSync(path)) {
               let content = fs.readFileSync(path, 'utf8');
               const regex = /[\s\S]*/;
               const replacement = `\n${memberRows}\n`;
-              
-              if (regex.test(content)) {
-                fs.writeFileSync(path, content.replace(regex, replacement));
-              } else {
-                console.log("Tags not found. Ensure README.md has the START and END comments.");
-              }
+              fs.writeFileSync(path, content.replace(regex, replacement));
             } else {
-              console.log("README.md not found in profile/ directory.");
+              throw new Error("README not found at profile/README.md");
             }
 
-      - name: Commit and Push Changes
+      - name: Force Update README
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add profile/README.md
-          git commit -m "chore: auto-update e3da member portfolios" || echo "No changes to commit"
-          git push
+          
+          # Check for changes before committing
+          if git diff --staged --quiet; then
+            echo "No changes detected."
+            exit 0
+          fi
 
-
+          git commit -m "chore: auto-update e3da members (Node 24)"
+          
+          # Force sync with remote and overwrite
+          git fetch origin main
+          git reset --soft origin/main
+          git push origin main --force

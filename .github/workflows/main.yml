@@ -2,12 +2,10 @@ name: Organization Profile Updater
 
 on:
   schedule:
-    # 16:10 UTC is 00:10 (12:10 AM) China Standard Time
     - cron: '10 16 * * *'
   workflow_dispatch: 
 
 env:
-  # Ensuring compatibility with Node 24 runners
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -16,72 +14,76 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          # This ensures we have full history to prevent push conflicts
+          fetch-depth: 0 
 
       - name: Generate Member Table
         uses: actions/github-script@v9
         with:
-          # Updated to your specific secret name
           github-token: ${{ secrets.YRPENG_E3DA_RO }} 
           script: |
             const org = 'e3da';
-            
-            // Paginate through all members (public & private)
-            const members = await github.paginate(github.rest.orgs.listMembers, {
-              org: org,
-              filter: 'all',
-              per_page: 100
-            });
-            
-            let memberRows = "| Member | Status | Portfolio |\n| :--- | :--- | :--- |\n";
-            let memberCount = 0;
-
-            for (const member of members) {
-              const { data: membership } = await github.rest.orgs.getMembershipForUser({
-                org,
-                username: member.login
-              });
-
-              // Excludes Owners/Admins to only show Members
-              if (membership.role === 'member') {
-                const { data: user } = await github.rest.users.getByUsername({ username: member.login });
-                const site = user.blog ? user.blog : `https://${user.login}.github.io`;
-                const status = user.status?.emoji ? `${user.status.emoji} ${user.status.message || ''}` : "Active";
-                
-                memberRows += `| **${user.name || user.login}** | ${status} | [Visit Portfolio](${site}) |\n`;
-                memberCount++;
-              }
-            }
-
-            if (memberCount === 0) memberRows += "| No members found | - | - |\n";
-
             const fs = require('fs');
-            const path = 'profile/README.md'; 
             
-            if (fs.existsSync(path)) {
-              let content = fs.readFileSync(path, 'utf8');
-              const regex = /[\s\S]*/;
-              const replacement = `\n${memberRows}\n`;
-              fs.writeFileSync(path, content.replace(regex, replacement));
-            } else {
-              throw new Error("README not found at profile/README.md");
+            async function run() {
+              const members = await github.paginate(github.rest.orgs.listMembers, {
+                org: org,
+                filter: 'all',
+                per_page: 100
+              });
+              
+              let memberRows = "| Member | Status | Portfolio |\n| :--- | :--- | :--- |\n";
+              let count = 0;
+
+              for (const member of members) {
+                const { data: membership } = await github.rest.orgs.getMembershipForUser({
+                  org,
+                  username: member.login
+                });
+
+                if (membership.role === 'member') {
+                  const { data: user } = await github.rest.users.getByUsername({ username: member.login });
+                  const site = user.blog ? user.blog : `https://${user.login}.github.io`;
+                  const status = user.status?.emoji ? `${user.status.emoji} ${user.status.message || ''}` : "Active";
+                  
+                  memberRows += `| **${user.name || user.login}** | ${status} | [Visit Portfolio](${site}) |\n`;
+                  count++;
+                }
+              }
+
+              if (count === 0) memberRows += "| No members found | - | - |\n";
+
+              const headPath = 'profile/RM-head.md';
+              const readmePath = 'profile/README.md';
+
+              if (!fs.existsSync(headPath)) {
+                throw new Error("RM-head.md missing in profile/ directory!");
+              }
+
+              const header = fs.readFileSync(headPath, 'utf8');
+              const finalContent = `${header}\n\n${memberRows}\n\n*Last updated: ${new Date().toUTCString()}*`;
+
+              fs.writeFileSync(readmePath, finalContent);
             }
 
-      - name: Force Update README
+            await run();
+
+      - name: Commit and Force Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           git add profile/README.md
           
-          # Check for changes before committing
+          # Check if README.md was actually changed/created
           if git diff --staged --quiet; then
-            echo "No changes detected."
+            echo "No changes detected in member list."
             exit 0
           fi
 
-          git commit -m "chore: auto-update e3da members (Node 24)"
+          git commit -m "chore: rebuilt README from RM-head.md"
           
-          # Force sync with remote and overwrite
-          git fetch origin main
-          git reset --soft origin/main
+          # Direct force push. 
+          # This overwrites the remote 'main' branch with the current runner's 'main' branch.
           git push origin main --force

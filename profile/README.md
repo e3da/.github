@@ -14,11 +14,11 @@ Here are the current members of E3DA Lab and their personal websites:
 | Member | Status | Portfolio |
 | :--- | :--- | :--- |
 | **Xinbo Zhou** | Active | [Visit Portfolio](https://jorychou.github.io) |
-| **Msanjabi** | Active | [Visit Portfolio](https://Msanjabi.github.io) |
+| **Mehran Sanjabiasasi** | Active | [Visit Portfolio](https://Msanjabi.github.io) |
 | **Bowen Wu** | Active | [Visit Portfolio](https://SynoFutis.github.io) |
 | **Zhuo Zhang** | Active | [Visit Portfolio](https://zhuo-zh.github.io) |
 | **Zhenyang Ma** | Active | [Visit Portfolio](https://zhy-Ma.github.io) |
 | **Zongsheng Song** | Active | [Visit Portfolio](https://zongshengsong.github.io) |
 
 
-*Last updated: Sat, 25 Apr 2026 19:54:39 GMT (via ubuntu-slim)*
+*Last updated: Sat, 16 May 2026 20:02:04 GMT (via ubuntu-slim)*

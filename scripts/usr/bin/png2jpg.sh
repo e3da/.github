@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 # Convert PNG avatar sources to JPG, optionally as a complete Git transaction.
 # Mode 0 prints commands, mode 1 converts locally, mode 2 pulls and commits with
-# rollback/push, and mode 3 regenerates metadata without Git rollback or push.
+# rollback/push, and mode 3 converts and validates without Git operations.
 
 usage() {
   cat <<'EOF'
@@ -13,7 +13,7 @@ Modes:
   0  Dry run: print the ImageMagick commands without changing files.
   1  Convert PNG avatars to JPG files locally.
   2  Pull origin/main, generate only missing JPGs, validate, commit, and push.
-  3  Convert avatars, regenerate metadata, and validate without Git operations.
+  3  Convert avatars and validate without Git operations.
 
 Note: mode 2 restores the original commit and removes generated files if any
 step fails. Mode 3 leaves files as-is when a step fails and never pushes.
@@ -116,10 +116,6 @@ if [[ $mode == 2 ]]; then
 fi
 
 convert_avatars
-
-if [[ $mode == 3 ]]; then
-  UPDATE_AVATARS=false node "$root_dir/scripts/update-members.js"
-fi
 
 if [[ $mode == 2 || $mode == 3 ]]; then
   node "$root_dir/scripts/validate-members.js"

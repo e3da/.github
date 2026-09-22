@@ -1,5 +1,6 @@
 const PROFILES_HEADER = 'username,name,email,status,portfolio,avatar';
 
+// Parse one RFC 4180-style row; profile values are always quoted by the writer.
 function parseCsvLine(line) {
   const values = [];
   let value = '';

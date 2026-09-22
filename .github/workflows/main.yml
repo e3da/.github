@@ -5,7 +5,7 @@ on:
     # Saturday 19:40 UTC is 03:40 AM China Standard Time
     - cron: '40 19 * * 6'
   workflow_dispatch:
-    # Manual runs refresh the 64px PNG avatars; scheduled runs update metadata only.
+    # Manual runs refresh the 64px PNG sources; JPG conversion is run locally.
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true

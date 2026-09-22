@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { PROFILES_HEADER, parseCsvLine } = require('./csv');
 
+// Validate profile structure, referenced avatar files, and generated README tables.
 const root = path.resolve(__dirname, '..');
 const csvPath = path.join(root, 'profile', 'members', 'profiles.csv');
 const readmePath = path.join(root, 'profile', 'README.md');
@@ -29,6 +30,19 @@ function validatePng(filePath) {
   }
 }
 
+// GitHub avatar responses have historically contained JPEG bytes despite a .png
+// URL, so this validator checks the generated JPG separately and only warns for
+// legacy source files that do not match their extension.
+function validateJpg(filePath) {
+  try {
+    const content = fs.readFileSync(filePath);
+    return content.length >= 4 && content[0] === 0xff && content[1] === 0xd8 &&
+      content[content.length - 2] === 0xff && content[content.length - 1] === 0xd9;
+  } catch {
+    return false;
+  }
+}
+
 async function validate() {
   for (const [username, , , status, , avatar] of profiles) {
     if (!username || usernames.has(username)) throw new Error(`Invalid or duplicate username: ${username}`);
@@ -36,15 +50,17 @@ async function validate() {
 
     if (status === 'Active') {
       if (avatar) {
-        if (!avatar.startsWith('members/avatars/png/') || !avatar.endsWith('.png')) {
+        const isPng = avatar.startsWith('members/avatars/png/') && avatar.endsWith('.png');
+        const isJpg = avatar.startsWith('members/avatars/jpg/') && avatar.endsWith('.jpg');
+        if (!isPng && !isJpg) {
           console.warn(`Warning: invalid active avatar path for ${username}: ${avatar}`);
           continue;
         }
         const avatarPath = path.join(root, 'profile', avatar);
         if (!fs.existsSync(avatarPath) || fs.statSync(avatarPath).size === 0) {
           console.warn(`Warning: missing active avatar: ${avatarPath}`);
-        } else if (!validatePng(avatarPath)) {
-          console.warn(`Warning: avatar is not a standard PNG: ${avatarPath}`);
+        } else if (isPng ? !validatePng(avatarPath) : !validateJpg(avatarPath)) {
+          console.warn(`Warning: avatar is not a valid ${isPng ? 'PNG' : 'JPG'}: ${avatarPath}`);
         }
       }
     } else if (status === 'Inactive' && avatar) {

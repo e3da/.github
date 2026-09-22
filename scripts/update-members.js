@@ -2,19 +2,27 @@ const fs = require('fs/promises');
 const path = require('path');
 const { PROFILES_HEADER, parseCsvLine } = require('./csv');
 
+// Fetch organization membership, preserve local profile data, and regenerate the
+// CSV and README. PNG files remain the downloadable source; local JPG files win
+// when they are available.
 const organization = 'e3da';
+const pageSize = 100;
 const root = path.resolve(__dirname, '..');
 const membersDirectory = path.join(root, 'profile', 'members');
 const csvPath = path.join(membersDirectory, 'profiles.csv');
 const readmePath = path.join(root, 'profile', 'README.md');
 const headerPath = path.join(root, 'profile', 'RM-head.md');
 const token = process.env.GITHUB_TOKEN;
-// Scheduled runs update member metadata only; manual runs also refresh avatars.
+// Scheduled runs update member metadata only; manual runs also refresh PNG sources.
 const updateAvatars = process.env.UPDATE_AVATARS === 'true';
 const pngAvatarDirectory = path.join(membersDirectory, 'avatars', 'png');
+const jpgAvatarDirectory = path.join(membersDirectory, 'avatars', 'jpg');
 
-async function github(pathname) {
-  const response = await fetch(`https://api.github.com${pathname}`, {
+async function github(pathname, parameters = {}) {
+  const url = new URL(`https://api.github.com${pathname}`);
+  for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
+
+  const response = await fetch(url, {
     headers: {
       Accept: 'application/vnd.github+json',
       'User-Agent': 'e3da-member-profile-updater',
@@ -22,8 +30,17 @@ async function github(pathname) {
     }
   });
 
-  if (!response.ok) throw new Error(`GitHub API ${response.status}: ${pathname}`);
+  if (!response.ok) throw new Error(`GitHub API ${response.status}: ${url.pathname}${url.search}`);
   return response.json();
+}
+
+async function githubList(pathname, parameters = {}) {
+  const items = [];
+  for (let page = 1; ; page++) {
+    const batch = await github(pathname, { ...parameters, page, per_page: pageSize });
+    items.push(...batch);
+    if (batch.length < pageSize) return items;
+  }
 }
 
 function csv(value) {
@@ -52,9 +69,16 @@ async function readExistingProfiles() {
   }
 }
 
+async function fileExists(filePath) {
+  return fs.access(filePath).then(() => true).catch((error) => {
+    if (error.code === 'ENOENT') return false;
+    throw error;
+  });
+}
+
 async function downloadAvatar(user) {
   try {
-    // GitHub provides the required avatar directly, so no image conversion is needed.
+    // Keep the original download separate from the locally generated JPG.
     const response = await fetch(`https://github.com/${user.login}.png?size=64`, {
       headers: { 'User-Agent': 'e3da-member-profile-updater' }
     });
@@ -68,7 +92,9 @@ async function downloadAvatar(user) {
     });
     if (previousSource?.equals(source)) return true;
 
-    await fs.writeFile(pngPath, source);
+    const temporaryPath = `${pngPath}.tmp`;
+    await fs.writeFile(temporaryPath, source);
+    await fs.rename(temporaryPath, pngPath);
     return true;
   } catch (error) {
     console.warn(`Warning: could not update avatar for ${user.login}: ${error.message}`);
@@ -76,8 +102,22 @@ async function downloadAvatar(user) {
   }
 }
 
+async function avatarPath(login) {
+  const jpgPath = path.join(jpgAvatarDirectory, `${login}.jpg`);
+  if (await fileExists(jpgPath)) {
+    return `members/avatars/jpg/${login}.jpg`;
+  }
+
+  const pngPath = path.join(pngAvatarDirectory, `${login}.png`);
+  if (await fileExists(pngPath)) {
+    return `members/avatars/png/${login}.png`;
+  }
+
+  return '';
+}
+
 async function main() {
-  const members = await github(`/orgs/${organization}/members?per_page=100&filter=all`);
+  const members = await githubList(`/orgs/${organization}/members`, { filter: 'all' });
   if (members.length === 0) {
     throw new Error('GitHub returned no organization members; refusing to overwrite member profiles.');
   }
@@ -85,6 +125,7 @@ async function main() {
   const profiles = new Map(existingProfiles);
   const activeLogins = new Set();
   await fs.mkdir(pngAvatarDirectory, { recursive: true });
+  await fs.mkdir(jpgAvatarDirectory, { recursive: true });
 
   for (const member of members) {
     const membership = await github(`/orgs/${organization}/memberships/${encodeURIComponent(member.login)}`);
@@ -93,17 +134,14 @@ async function main() {
 
     const user = await github(`/users/${encodeURIComponent(member.login)}`);
     const previous = existingProfiles.get(user.login);
-    const previousAvatarPath = previous?.avatar ? path.join(root, 'profile', previous.avatar) : '';
-    const hasPreviousAvatar = previousAvatarPath && await fs.access(previousAvatarPath).then(() => true).catch(() => false);
-    const avatarUpdated = updateAvatars ? await downloadAvatar(user) : false;
-    // Keep a missing avatar during scheduled runs; a manual run populates it.
+    if (updateAvatars) await downloadAvatar(user);
     profiles.set(user.login, {
       username: user.login,
       name: user.name || user.login,
       email: user.email || previous?.email || '',
       status: 'Active',
       portfolio: portfolio(user),
-      avatar: avatarUpdated || hasPreviousAvatar ? `members/avatars/png/${user.login}.png` : ''
+      avatar: await avatarPath(user.login)
     });
   }
 
@@ -116,6 +154,7 @@ async function main() {
         await fs.rm(path.join(root, 'profile', previousAvatar), { force: true });
       }
       await fs.rm(path.join(pngAvatarDirectory, `${profile.username}.png`), { force: true });
+      await fs.rm(path.join(jpgAvatarDirectory, `${profile.username}.jpg`), { force: true });
     }
   }
 

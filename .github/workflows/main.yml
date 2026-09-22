@@ -49,12 +49,6 @@ jobs:
       - name: Validate Member Profiles
         run: node scripts/validate-members.js
 
-      # JPGs are temporary manual-run artifacts. Removing them before the commit
-      # keeps the next manual run eligible for conversion and leaves PNG sources
-      # as the only committed avatar format.
-      - name: Remove temporary JPG fallbacks
-        run: rm -rf profile/members/avatars/jpg
-
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"

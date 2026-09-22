@@ -5,7 +5,7 @@ on:
     # Saturday 19:40 UTC is 03:40 AM China Standard Time
     - cron: '40 19 * * 6'
   workflow_dispatch:
-    # Manual runs refresh the 64px PNG sources; JPG conversion is run locally.
+    # Manual runs refresh PNG sources and create JPG fallbacks when absent.
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -30,6 +30,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.YRPENG_E3DA_RO }}
           UPDATE_AVATARS: ${{ github.event_name == 'workflow_dispatch' }}
+        run: node scripts/update-members.js
+
+      - name: Install ImageMagick for JPG fallback
+        if: github.event_name == 'workflow_dispatch' && !hashFiles('profile/members/avatars/jpg/**')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+
+      - name: Generate JPG fallbacks
+        if: github.event_name == 'workflow_dispatch' && !hashFiles('profile/members/avatars/jpg/**')
+        run: scripts/usr/bin/png2jpg.sh 1
+
+      - name: Refresh profile image references
+        if: github.event_name == 'workflow_dispatch' && hashFiles('profile/members/avatars/jpg/**')
+        env:
+          GITHUB_TOKEN: ${{ secrets.YRPENG_E3DA_RO }}
         run: node scripts/update-members.js
 
       - name: Validate Member Profiles

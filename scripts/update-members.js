@@ -125,7 +125,6 @@ async function main() {
   const profiles = new Map(existingProfiles);
   const activeLogins = new Set();
   await fs.mkdir(pngAvatarDirectory, { recursive: true });
-  await fs.mkdir(jpgAvatarDirectory, { recursive: true });
 
   for (const member of members) {
     const membership = await github(`/orgs/${organization}/memberships/${encodeURIComponent(member.login)}`);

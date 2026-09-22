@@ -2,8 +2,8 @@
 set -Eeuo pipefail
 
 # Convert PNG avatar sources to JPG, optionally as a complete Git transaction.
-# Mode 0 prints conversion commands, mode 1 converts locally, and mode 2 pulls,
-# converts, regenerates PNG-first metadata, commits, and pushes the result.
+# Mode 0 prints commands, mode 1 converts locally, mode 2 pulls and commits with
+# rollback/push, and mode 4 regenerates metadata without Git rollback or push.
 
 usage() {
   cat <<'EOF'
@@ -13,9 +13,10 @@ Modes:
   0  Dry run: print the ImageMagick commands without changing files.
   1  Convert PNG avatars to JPG files locally.
   2  Pull origin/main, convert avatars, regenerate metadata, commit, and push.
+  4  Convert avatars, regenerate metadata, and validate without Git operations.
 
 Note: mode 2 restores the original commit and removes generated files if any
-step fails. Review the dry-run output with mode 0 before using mode 1 or 2.
+step fails. Mode 4 leaves files as-is when a step fails and never pushes.
 EOF
 }
 
@@ -24,8 +25,8 @@ if (($# == 0)); then
   exit 0
 fi
 
-if (($# != 1)) || [[ ! $1 =~ ^[012]$ ]]; then
-  printf 'Error: mode must be 0, 1, or 2.\n\n' >&2
+if (($# != 1)) || [[ ! $1 =~ ^[0124]$ ]]; then
+  printf 'Error: mode must be 0, 1, 2, or 4.\n\n' >&2
   usage >&2
   exit 2
 fi
@@ -35,7 +36,6 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 root_dir=$(cd -- "$script_dir/../../.." && pwd)
 source_dir="$root_dir/profile/members/avatars/png"
 destination_dir="$root_dir/profile/members/avatars/jpg"
-git_dir="$root_dir/.git"
 
 if command -v magick >/dev/null 2>&1; then
   converter=(magick)
@@ -113,9 +113,12 @@ fi
 
 convert_avatars
 
-if [[ $mode == 2 ]]; then
+if [[ $mode == 2 || $mode == 4 ]]; then
   UPDATE_AVATARS=false node "$root_dir/scripts/update-members.js"
   node "$root_dir/scripts/validate-members.js"
+fi
+
+if [[ $mode == 2 ]]; then
   git -C "$root_dir" add profile/README.md profile/members/
   if git -C "$root_dir" diff --cached --quiet; then
     printf 'No avatar or profile changes to commit.\n'

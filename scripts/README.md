@@ -6,8 +6,8 @@
 - The README and CSV prefer raw PNG files and fall back to JPG only when a raw PNG is unavailable.
 - Files in `profile/members/avatars/jpg` are independently decoded, resized to 64x64, and re-encoded as valid JPGs. JPG files are committed with the profile update.
 - JPG generators normalize filenames to lowercase GitHub login names.
-- The GitHub Action installs `sharp` on manual runs and fills missing JPG fallbacks. It does not add a Node dependency to this repository.
-- `scripts/usr/bin/png2jpg.sh` remains the local ImageMagick utility. It reads `raw` sources and only converts PNG files; the Action uses `scripts/png2jpg.js` to avoid the larger ImageMagick installation.
+- The GitHub Action installs `sharp` for each run and fills missing JPG fallbacks. It does not add a Node dependency to this repository.
+- `scripts/usr/bin/png2jpg.sh` remains the local ImageMagick utility. It reads raw PNG or JPEG sources and converts them to 64x64 JPGs; the Action uses `scripts/png2jpg.js` to avoid the larger ImageMagick installation.
 
 ## Main scripts
 

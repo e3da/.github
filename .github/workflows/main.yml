@@ -39,7 +39,6 @@ jobs:
         run: node scripts/png2jpg.js
 
       - name: Refresh profile image references
-        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.YRPENG_E3DA_RO }}
         run: node scripts/update-members.js

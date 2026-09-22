@@ -13,7 +13,7 @@ const csvPath = path.join(membersDirectory, 'profiles.csv');
 const readmePath = path.join(root, 'profile', 'README.md');
 const headerPath = path.join(root, 'profile', 'RM-head.md');
 const token = process.env.GITHUB_TOKEN;
-// Scheduled runs update member metadata only; manual runs also refresh PNG sources.
+// Scheduled runs update member metadata only; manual runs also refresh raw sources.
 const updateAvatars = process.env.UPDATE_AVATARS === 'true';
 const rawAvatarDirectory = path.join(membersDirectory, 'avatars', 'raw');
 const jpgAvatarDirectory = path.join(membersDirectory, 'avatars', 'jpg');

@@ -30,9 +30,8 @@ function validatePng(filePath) {
   }
 }
 
-// GitHub avatar responses have historically contained JPEG bytes despite a .png
-// URL, so this validator checks the generated JPG separately and only warns for
-// legacy source files that do not match their extension.
+// Raw downloads keep their detected extension; generated JPGs are always
+// independently re-encoded fallback files.
 function validateJpg(filePath) {
   try {
     const content = fs.readFileSync(filePath);

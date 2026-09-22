@@ -59,7 +59,6 @@ convert_avatars() {
   for source in "$source_dir"/*; do
     [[ -f "$source" ]] || continue
     found_source=true
-    filename=$(basename "$source" .png)
     extension=${source##*.}
     extension=${extension,,}
     if [[ $extension != png && $extension != jpg && $extension != jpeg ]]; then
@@ -95,7 +94,7 @@ convert_avatars() {
   done
 
   if [[ $found_source == false ]]; then
-    printf 'Warning: no PNG files found in %s\n' "$source_dir" >&2
+    printf 'Warning: no supported avatar files found in %s\n' "$source_dir" >&2
   fi
 }
 

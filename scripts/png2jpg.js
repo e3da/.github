@@ -23,7 +23,7 @@ async function main() {
     const extension = path.extname(sourceName).toLowerCase();
     const baseName = path.basename(sourceName, extension).toLowerCase();
     if (destinationNames.has(baseName)) {
-      throw new Error(`PNG filenames collide after lowercase normalization: ${baseName}`);
+      throw new Error(`Avatar filenames collide after lowercase normalization: ${baseName}`);
     }
     destinationNames.add(baseName);
     const sourcePath = path.join(sourceDirectory, sourceName);

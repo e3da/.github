@@ -18,9 +18,14 @@ async function main() {
   }
 
   await fs.mkdir(destinationDirectory, { recursive: true });
+  const destinationNames = new Set();
 
   for (const sourceName of sourceNames) {
-    const baseName = path.basename(sourceName, path.extname(sourceName));
+    const baseName = path.basename(sourceName, path.extname(sourceName)).toLowerCase();
+    if (destinationNames.has(baseName)) {
+      throw new Error(`PNG filenames collide after lowercase normalization: ${baseName}`);
+    }
+    destinationNames.add(baseName);
     const sourcePath = path.join(sourceDirectory, sourceName);
     const destinationPath = path.join(destinationDirectory, `${baseName}.jpg`);
     const temporaryPath = path.join(destinationDirectory, `.${baseName}.jpg.tmp`);

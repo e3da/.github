@@ -5,6 +5,7 @@
 - PNG files in `profile/members/avatars/png` are the committed, dynamically refreshed sources.
 - The README and CSV prefer PNG and fall back to JPG only when a PNG is unavailable.
 - JPG files are generated manual-workflow fallbacks and are committed with the profile update so the conversion result is not lost.
+- JPG generators normalize filenames to lowercase GitHub login names.
 - The GitHub Action installs `sharp` only when the JPG directory is absent. It does not add a Node dependency to this repository.
 - `scripts/usr/bin/png2jpg.sh` remains the local ImageMagick utility. The Action uses `scripts/png2jpg.js` to avoid the larger ImageMagick installation.
 

@@ -59,13 +59,25 @@ function githubLogin(user) {
   return user.login.toLowerCase();
 }
 
+function normalizeLogin(login) {
+  return String(login).toLowerCase();
+}
+
 async function readExistingProfiles() {
   try {
     const content = await fs.readFile(csvPath, 'utf8');
     const lines = content.trim().split('\n').slice(1).filter(Boolean);
     return new Map(lines.map((line) => {
       const [username, name, email, status, userPortfolio, avatar] = parseCsvLine(line);
-      return [username, { username, name, email, status, portfolio: userPortfolio, avatar }];
+      const normalizedUsername = normalizeLogin(username);
+      return [normalizedUsername, {
+        username: normalizedUsername,
+        name,
+        email,
+        status,
+        portfolio: userPortfolio,
+        avatar
+      }];
     }));
   } catch (error) {
     if (error.code === 'ENOENT') return new Map();
@@ -133,7 +145,7 @@ async function main() {
   for (const member of members) {
     const membership = await github(`/orgs/${organization}/memberships/${encodeURIComponent(member.login)}`);
     if (membership.role !== 'member' || membership.state !== 'active') continue;
-    activeLogins.add(member.login);
+    activeLogins.add(normalizeLogin(member.login));
 
     const user = await github(`/users/${encodeURIComponent(member.login)}`);
     const username = githubLogin(user);

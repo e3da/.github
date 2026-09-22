@@ -59,6 +59,7 @@ convert_avatars() {
     [[ -f "$source" ]] || continue
     found_source=true
     filename=$(basename "$source" .png)
+    filename=${filename,,}
     destination="$destination_dir/$filename.jpg"
     temporary="$destination_dir/.$filename.jpg.tmp"
     if [[ $mode == 2 && -f "$destination" ]]; then

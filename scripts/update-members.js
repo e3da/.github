@@ -52,7 +52,11 @@ function markdown(value) {
 }
 
 function portfolio(user) {
-  return user.blog?.trim() || `https://${user.login}.github.io`;
+  return user.blog?.trim() || `https://${user.login.toLowerCase()}.github.io`;
+}
+
+function githubLogin(user) {
+  return user.login.toLowerCase();
 }
 
 async function readExistingProfiles() {
@@ -132,11 +136,12 @@ async function main() {
     activeLogins.add(member.login);
 
     const user = await github(`/users/${encodeURIComponent(member.login)}`);
-    const previous = existingProfiles.get(user.login);
+    const username = githubLogin(user);
+    const previous = existingProfiles.get(username);
     if (updateAvatars) await downloadAvatar(user);
-    profiles.set(user.login, {
-      username: user.login,
-      name: user.name || user.login,
+    profiles.set(username, {
+      username,
+      name: user.name || username,
       email: user.email || previous?.email || '',
       status: 'Active',
       portfolio: portfolio(user),

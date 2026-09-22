@@ -10,17 +10,17 @@ Prof Peng has moved from University of Arkansas to Southeast University. For the
 ### Github Member Profiles 
 Here are the current members of E3DA Lab and their personal websites:
 
-| Headshot | Member | Email | Portfolio |
-| :---: | :--- | :--- | :--- |
-| - | [Xinbo Zhou](https://github.com/jorychou) | - | [https://jorychou.github.io](https://jorychou.github.io) |
-| - | [Mingyu Zhang](https://github.com/mingyu-zhang717) | - | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
-| - | [Mehran Sanjabiasasi](https://github.com/Msanjabi) | - | [https://Msanjabi.github.io](https://Msanjabi.github.io) |
-| - | [Qiuting Cai](https://github.com/Qiuting-Cai) | - | [https://Qiuting-Cai.github.io](https://Qiuting-Cai.github.io) |
-| - | [Bowen Wu](https://github.com/SynoFutis) | - | [https://SynoFutis.github.io](https://SynoFutis.github.io) |
-| - | [Yumeng Liu](https://github.com/ymliu01) | - | [https://ymliu01.github.io](https://ymliu01.github.io) |
-| - | [Yuxiang Huang](https://github.com/yx-huang-cn) | - | [https://yx-huang-cn.github.io](https://yx-huang-cn.github.io) |
-| - | [Zhuo Zhang](https://github.com/zhuo-zh) | - | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
-| - | [Zhenyang Ma](https://github.com/zhy-Ma) | - | [https://zhy-Ma.github.io](https://zhy-Ma.github.io) |
-| - | [Zongsheng Song](https://github.com/zongshengsong) | - | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
+| Headshot | Member | Portfolio |
+| :---: | :--- | :--- |
+| - | [Xinbo Zhou](https://github.com/jorychou) | [https://jorychou.github.io](https://jorychou.github.io) |
+| - | [Mingyu Zhang](https://github.com/mingyu-zhang717) | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
+| - | [Mehran Sanjabiasasi](https://github.com/Msanjabi) | [https://Msanjabi.github.io](https://Msanjabi.github.io) |
+| - | [Qiuting Cai](https://github.com/Qiuting-Cai) | [https://Qiuting-Cai.github.io](https://Qiuting-Cai.github.io) |
+| - | [Bowen Wu](https://github.com/SynoFutis) | [https://SynoFutis.github.io](https://SynoFutis.github.io) |
+| - | [Yumeng Liu](https://github.com/ymliu01) | [https://ymliu01.github.io](https://ymliu01.github.io) |
+| - | [Yuxiang Huang](https://github.com/yx-huang-cn) | [https://yx-huang-cn.github.io](https://yx-huang-cn.github.io) |
+| - | [Zhuo Zhang](https://github.com/zhuo-zh) | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
+| - | [Zhenyang Ma](https://github.com/zhy-Ma) | [https://zhy-Ma.github.io](https://zhy-Ma.github.io) |
+| - | [Zongsheng Song](https://github.com/zongshengsong) | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
 
 *Last updated: Tue, 22 Sep 2026 14:15:57 GMT (via ubuntu-slim)*

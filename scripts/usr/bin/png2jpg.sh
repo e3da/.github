@@ -12,7 +12,7 @@ Usage: scripts/usr/bin/png2jpg.sh <mode>
 Modes:
   0  Dry run: print the ImageMagick commands without changing files.
   1  Convert PNG avatars to JPG files locally.
-  2  Pull origin/main, generate only missing JPGs, regenerate metadata, commit, and push.
+  2  Pull origin/main, generate only missing JPGs, validate, commit, and push.
   3  Convert avatars, regenerate metadata, and validate without Git operations.
 
 Note: mode 2 restores the original commit and removes generated files if any
@@ -117,8 +117,11 @@ fi
 
 convert_avatars
 
-if [[ $mode == 2 || $mode == 3 ]]; then
+if [[ $mode == 3 ]]; then
   UPDATE_AVATARS=false node "$root_dir/scripts/update-members.js"
+fi
+
+if [[ $mode == 2 || $mode == 3 ]]; then
   node "$root_dir/scripts/validate-members.js"
 fi
 

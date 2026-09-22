@@ -81,7 +81,7 @@ async function readExistingProfiles() {
 }
 
 async function downloadAvatar(user) {
-  const response = await fetch(`https://github.com/${user.login}.png?size=160`, {
+  const response = await fetch(`https://github.com/${user.login}.png?size=64`, {
     headers: { 'User-Agent': 'e3da-member-profile-updater' }
   });
   if (!response.ok) throw new Error(`Avatar download ${response.status}: ${user.login}`);

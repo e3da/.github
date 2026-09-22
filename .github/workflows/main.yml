@@ -5,7 +5,7 @@ on:
     # Saturday 19:40 UTC is 03:40 AM China Standard Time
     - cron: '40 19 * * 6'
   workflow_dispatch:
-    # Manual runs refresh PNG sources and create JPG fallbacks when absent.
+    # Manual runs refresh PNG sources and fill any missing JPG fallbacks.
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -33,11 +33,11 @@ jobs:
         run: node scripts/update-members.js
 
       - name: Install sharp for JPG fallback
-        if: github.event_name == 'workflow_dispatch' && !hashFiles('profile/members/avatars/jpg/**')
+        if: github.event_name == 'workflow_dispatch'
         run: npm install --no-save --no-package-lock sharp
 
       - name: Generate JPG fallbacks
-        if: github.event_name == 'workflow_dispatch' && !hashFiles('profile/members/avatars/jpg/**')
+        if: github.event_name == 'workflow_dispatch'
         run: node scripts/png2jpg.js
 
       - name: Refresh profile image references

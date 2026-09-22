@@ -2,8 +2,8 @@ const fs = require('fs/promises');
 const path = require('path');
 const sharp = require('sharp');
 
-// Convert refreshed PNG sources to temporary JPG fallbacks for the manual
-// workflow. sharp is installed only by that workflow and is not a repo dependency.
+// Fill missing JPG fallbacks for the manual workflow. sharp is installed only
+// by that workflow and is not a repo dependency.
 const root = path.resolve(__dirname, '..');
 const sourceDirectory = path.join(root, 'profile', 'members', 'avatars', 'png');
 const destinationDirectory = path.join(root, 'profile', 'members', 'avatars', 'jpg');
@@ -29,6 +29,14 @@ async function main() {
     const sourcePath = path.join(sourceDirectory, sourceName);
     const destinationPath = path.join(destinationDirectory, `${baseName}.jpg`);
     const temporaryPath = path.join(destinationDirectory, `.${baseName}.jpg.tmp`);
+
+    if (await fs.access(destinationPath).then(() => true).catch((error) => {
+      if (error.code === 'ENOENT') return false;
+      throw error;
+    })) {
+      console.log(`Keeping existing ${destinationPath}`);
+      continue;
+    }
 
     await sharp(sourcePath)
       .flatten({ background: '#ffffff' })

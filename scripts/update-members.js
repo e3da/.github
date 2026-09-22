@@ -92,6 +92,22 @@ async function fileExists(filePath) {
   });
 }
 
+async function findAvatarPath(directory, login, extension) {
+  const normalizedName = `${normalizeLogin(login)}${extension}`;
+  let names;
+  try {
+    names = await fs.readdir(directory);
+  } catch (error) {
+    if (error.code === 'ENOENT') return '';
+    throw error;
+  }
+  const matches = names.filter((candidate) => candidate.toLowerCase() === normalizedName);
+  if (matches.length > 1) {
+    throw new Error(`Ambiguous avatar files for ${login}: ${matches.join(', ')}`);
+  }
+  return matches.length === 1 ? path.join(directory, matches[0]) : '';
+}
+
 async function downloadAvatar(user) {
   try {
     // Keep the original download separate from the locally generated JPG.
@@ -119,14 +135,14 @@ async function downloadAvatar(user) {
 }
 
 async function avatarPath(login) {
-  const pngPath = path.join(pngAvatarDirectory, `${login}.png`);
-  if (await fileExists(pngPath)) {
-    return `members/avatars/png/${login}.png`;
+  const pngPath = await findAvatarPath(pngAvatarDirectory, login, '.png');
+  if (pngPath) {
+    return `members/avatars/png/${path.basename(pngPath)}`;
   }
 
-  const jpgPath = path.join(jpgAvatarDirectory, `${login}.jpg`);
-  if (await fileExists(jpgPath)) {
-    return `members/avatars/jpg/${login}.jpg`;
+  const jpgPath = await findAvatarPath(jpgAvatarDirectory, login, '.jpg');
+  if (jpgPath) {
+    return `members/avatars/jpg/${path.basename(jpgPath)}`;
   }
 
   return '';

@@ -12,15 +12,15 @@ Here are the current members of E3DA Lab and their personal websites:
 
 | Headshot | Member | Portfolio |
 | :---: | :--- | :--- |
-| <img src="members/avatars/jpg/SynoFutis.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Bowen Wu](https://github.com/SynoFutis)** | [https://SynoFutis.github.io](https://SynoFutis.github.io) |
-| <img src="members/avatars/jpg/Msanjabi.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mehran Sanjabiasasi](https://github.com/Msanjabi)** | [https://Msanjabi.github.io](https://Msanjabi.github.io) |
-| <img src="members/avatars/jpg/mingyu-zhang717.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mingyu Zhang](https://github.com/mingyu-zhang717)** | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
-| <img src="members/avatars/jpg/Qiuting-Cai.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Qiuting Cai](https://github.com/Qiuting-Cai)** | [https://Qiuting-Cai.github.io](https://Qiuting-Cai.github.io) |
-| <img src="members/avatars/jpg/jorychou.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Xinbo Zhou](https://github.com/jorychou)** | [https://jorychou.github.io](https://jorychou.github.io) |
-| <img src="members/avatars/jpg/ymliu01.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yumeng Liu](https://github.com/ymliu01)** | [https://ymliu01.github.io](https://ymliu01.github.io) |
-| <img src="members/avatars/jpg/yx-huang-cn.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yuxiang Huang](https://github.com/yx-huang-cn)** | [https://yx-huang-cn.github.io](https://yx-huang-cn.github.io) |
-| <img src="members/avatars/jpg/zhy-Ma.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhenyang Ma](https://github.com/zhy-Ma)** | [https://zhy-Ma.github.io](https://zhy-Ma.github.io) |
-| <img src="members/avatars/jpg/zhuo-zh.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhuo Zhang](https://github.com/zhuo-zh)** | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
-| <img src="members/avatars/jpg/zongshengsong.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zongsheng Song](https://github.com/zongshengsong)** | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
+| <img src="members/avatars/png/SynoFutis.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Bowen Wu](https://github.com/SynoFutis)** | [https://SynoFutis.github.io](https://SynoFutis.github.io) |
+| <img src="members/avatars/png/Msanjabi.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mehran Sanjabiasasi](https://github.com/Msanjabi)** | [https://Msanjabi.github.io](https://Msanjabi.github.io) |
+| <img src="members/avatars/png/mingyu-zhang717.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mingyu Zhang](https://github.com/mingyu-zhang717)** | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
+| <img src="members/avatars/png/Qiuting-Cai.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Qiuting Cai](https://github.com/Qiuting-Cai)** | [https://Qiuting-Cai.github.io](https://Qiuting-Cai.github.io) |
+| <img src="members/avatars/png/jorychou.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Xinbo Zhou](https://github.com/jorychou)** | [https://jorychou.github.io](https://jorychou.github.io) |
+| <img src="members/avatars/png/ymliu01.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yumeng Liu](https://github.com/ymliu01)** | [https://ymliu01.github.io](https://ymliu01.github.io) |
+| <img src="members/avatars/png/yx-huang-cn.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yuxiang Huang](https://github.com/yx-huang-cn)** | [https://yx-huang-cn.github.io](https://yx-huang-cn.github.io) |
+| <img src="members/avatars/png/zhy-Ma.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhenyang Ma](https://github.com/zhy-Ma)** | [https://zhy-Ma.github.io](https://zhy-Ma.github.io) |
+| <img src="members/avatars/png/zhuo-zh.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhuo Zhang](https://github.com/zhuo-zh)** | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
+| <img src="members/avatars/png/zongshengsong.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zongsheng Song](https://github.com/zongshengsong)** | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
 
 *Last updated: Tue, 22 Sep 2026 16:04:50 GMT (via ubuntu-slim)*

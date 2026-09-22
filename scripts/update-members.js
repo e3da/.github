@@ -3,8 +3,8 @@ const path = require('path');
 const { PROFILES_HEADER, parseCsvLine } = require('./csv');
 
 // Fetch organization membership, preserve local profile data, and regenerate the
-// CSV and README. PNG files remain the downloadable source; local JPG files win
-// when they are available.
+// CSV and README. PNG files are preferred because they are refreshed dynamically;
+// local JPG files are used only when a PNG is unavailable.
 const organization = 'e3da';
 const pageSize = 100;
 const root = path.resolve(__dirname, '..');
@@ -103,14 +103,14 @@ async function downloadAvatar(user) {
 }
 
 async function avatarPath(login) {
-  const jpgPath = path.join(jpgAvatarDirectory, `${login}.jpg`);
-  if (await fileExists(jpgPath)) {
-    return `members/avatars/jpg/${login}.jpg`;
-  }
-
   const pngPath = path.join(pngAvatarDirectory, `${login}.png`);
   if (await fileExists(pngPath)) {
     return `members/avatars/png/${login}.png`;
+  }
+
+  const jpgPath = path.join(jpgAvatarDirectory, `${login}.jpg`);
+  if (await fileExists(jpgPath)) {
+    return `members/avatars/jpg/${login}.jpg`;
   }
 
   return '';

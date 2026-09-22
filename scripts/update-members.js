@@ -89,6 +89,15 @@ async function downloadAvatar(user) {
   const source = Buffer.from(await response.arrayBuffer());
   const pngPath = path.join(pngAvatarDirectory, `${user.login}.png`);
   const jpgPath = path.join(jpgAvatarDirectory, `${user.login}.jpg`);
+  const previousSource = await fs.readFile(pngPath).catch((error) => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  const sourceUnchanged = previousSource?.equals(source) ?? false;
+  const jpgExists = await fs.access(jpgPath).then(() => true).catch(() => false);
+
+  if (sourceUnchanged && jpgExists) return;
+
   await fs.writeFile(pngPath, source);
   const imageTool = await fs.access('/usr/bin/magick').then(() => 'magick').catch(() => 'convert');
   await execFileAsync(imageTool, [

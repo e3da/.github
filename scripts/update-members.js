@@ -1,6 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
-const sharp = require('sharp');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
 
 const organization = 'e3da';
 const root = path.resolve(__dirname, '..');
@@ -9,8 +10,10 @@ const csvPath = path.join(membersDirectory, 'profiles.csv');
 const readmePath = path.join(root, 'profile', 'README.md');
 const headerPath = path.join(root, 'profile', 'RM-head.md');
 const token = process.env.GITHUB_TOKEN;
+const updateAvatars = process.env.UPDATE_AVATARS === 'true';
 const pngAvatarDirectory = path.join(membersDirectory, 'avatars', 'png');
 const jpgAvatarDirectory = path.join(membersDirectory, 'avatars', 'jpg');
+const execFileAsync = promisify(execFile);
 
 async function github(pathname) {
   const response = await fetch(`https://api.github.com${pathname}`, {
@@ -44,11 +47,13 @@ function parseCsvLine(line) {
 
   for (let index = 0; index < line.length; index++) {
     const character = line[index];
-    if (character === '"' && line[index + 1] === '"') {
-      value += '"';
-      index++;
-    } else if (character === '"') {
-      quoted = !quoted;
+    if (character === '"') {
+      if (quoted && line[index + 1] === '"') {
+        value += '"';
+        index++;
+      } else {
+        quoted = !quoted;
+      }
     } else if (character === ',' && !quoted) {
       values.push(value);
       value = '';
@@ -81,20 +86,26 @@ async function downloadAvatar(user) {
   });
   if (!response.ok) throw new Error(`Avatar download ${response.status}: ${user.login}`);
 
-  const circleMask = Buffer.from(
-    '<svg width="32" height="32"><circle cx="16" cy="16" r="16" fill="white"/></svg>'
-  );
   const source = Buffer.from(await response.arrayBuffer());
-  await fs.writeFile(path.join(pngAvatarDirectory, `${user.login}.png`), source);
-
-  const avatar = await sharp(source)
-    .resize(32, 32, { fit: 'cover' })
-    .composite([{ input: circleMask, blend: 'dest-in' }])
-    .flatten({ background: '#ffffff' })
-    .jpeg({ quality: 85 })
-    .toBuffer();
-
-  await fs.writeFile(path.join(jpgAvatarDirectory, `${user.login}.jpg`), avatar);
+  const pngPath = path.join(pngAvatarDirectory, `${user.login}.png`);
+  const jpgPath = path.join(jpgAvatarDirectory, `${user.login}.jpg`);
+  await fs.writeFile(pngPath, source);
+  const imageTool = await fs.access('/usr/bin/magick').then(() => 'magick').catch(() => 'convert');
+  await execFileAsync(imageTool, [
+    pngPath,
+    '-resize', '64x64^',
+    '-gravity', 'center',
+    '-extent', '64x64',
+    '(', '-size', '64x64', 'xc:none', '-fill', 'white',
+    '-draw', 'circle 32,32 32,0', ')',
+    '-alpha', 'on',
+    '-compose', 'DstIn',
+    '-composite',
+    '-background', 'white',
+    '-alpha', 'remove',
+    '-quality', '85',
+    jpgPath
+  ]);
 }
 
 async function main() {
@@ -115,16 +126,18 @@ async function main() {
 
     const user = await github(`/users/${encodeURIComponent(member.login)}`);
     const previous = existingProfiles.get(user.login);
+    const previousAvatarPath = previous?.avatar ? path.join(root, 'profile', previous.avatar) : '';
+    const hasPreviousAvatar = previousAvatarPath && await fs.access(previousAvatarPath).then(() => true).catch(() => false);
     profiles.set(user.login, {
       username: user.login,
       name: user.name || user.login,
       email: user.email || previous?.email || '',
       status: 'Active',
       portfolio: portfolio(user),
-      avatar: `members/avatars/jpg/${user.login}.jpg`
+      avatar: updateAvatars || hasPreviousAvatar ? `members/avatars/jpg/${user.login}.jpg` : ''
     });
 
-    await downloadAvatar(user);
+    if (updateAvatars) await downloadAvatar(user);
   }
 
   for (const profile of profiles.values()) {
@@ -153,7 +166,7 @@ async function main() {
   await fs.writeFile(csvPath, csvContent);
 
   const activeRows = sortedProfiles.filter((profile) => profile.status === 'Active').map((profile) =>
-    `| ![${markdown(profile.name)}](${profile.avatar}) | **[${markdown(profile.name)}](https://github.com/${profile.username})** | ${markdown(profile.email) || '-'} | [${markdown(profile.portfolio)}](${profile.portfolio}) |`
+    `| ${profile.avatar ? `<img src="${profile.avatar}" width="32" height="32" style="border-radius: 50%;" alt="Profile Image">` : '-'} | **[${markdown(profile.name)}](https://github.com/${profile.username})** | ${markdown(profile.email) || '-'} | [${markdown(profile.portfolio)}](${profile.portfolio}) |`
   );
   const activeTable = [
     '| Headshot | Member | Email | Portfolio |',

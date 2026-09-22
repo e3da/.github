@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
+const { execFileSync } = require('child_process');
 
 const root = path.resolve(__dirname, '..');
 const csvPath = path.join(root, 'profile', 'members', 'profiles.csv');
@@ -15,11 +15,13 @@ function parseCsvLine(line) {
 
   for (let index = 0; index < line.length; index++) {
     const character = line[index];
-    if (character === '"' && line[index + 1] === '"') {
-      value += '"';
-      index++;
-    } else if (character === '"') {
-      quoted = !quoted;
+    if (character === '"') {
+      if (quoted && line[index + 1] === '"') {
+        value += '"';
+        index++;
+      } else {
+        quoted = !quoted;
+      }
     } else if (character === ',' && !quoted) {
       values.push(value);
       value = '';
@@ -46,20 +48,22 @@ for (const [username, , , status, , avatar] of profiles) {
   usernames.add(username);
 
   if (status === 'Active') {
-    if (!avatar.startsWith('members/avatars/jpg/') || !avatar.endsWith('.jpg')) {
-      throw new Error(`Invalid active avatar path: ${username}`);
-    }
-    const avatarPath = path.join(root, 'profile', avatar);
-    if (!fs.existsSync(avatarPath) || fs.statSync(avatarPath).size === 0) {
-      throw new Error(`Missing active avatar: ${avatarPath}`);
-    }
-    const metadata = await sharp(avatarPath).metadata();
-    if (metadata.format !== 'jpeg' || metadata.width !== 32 || metadata.height !== 32) {
-      throw new Error(`Avatar must be a 32x32 JPEG: ${avatarPath}`);
-    }
-    const pngPath = path.join(root, 'profile', 'members', 'avatars', 'png', `${username}.png`);
-    if (!fs.existsSync(pngPath) || fs.statSync(pngPath).size === 0) {
-      throw new Error(`Missing source PNG avatar: ${pngPath}`);
+    if (avatar) {
+      if (!avatar.startsWith('members/avatars/jpg/') || !avatar.endsWith('.jpg')) {
+        throw new Error(`Invalid active avatar path: ${username}`);
+      }
+      const avatarPath = path.join(root, 'profile', avatar);
+      if (!fs.existsSync(avatarPath) || fs.statSync(avatarPath).size === 0) {
+        throw new Error(`Missing active avatar: ${avatarPath}`);
+      }
+      const metadata = execFileSync('identify', ['-format', '%m %wx%h', avatarPath], { encoding: 'utf8' });
+      if (metadata !== 'JPEG 64x64') {
+        throw new Error(`Avatar must be a 64x64 JPEG: ${avatarPath} (${metadata})`);
+      }
+      const pngPath = path.join(root, 'profile', 'members', 'avatars', 'png', `${username}.png`);
+      if (!fs.existsSync(pngPath) || fs.statSync(pngPath).size === 0) {
+        throw new Error(`Missing source PNG avatar: ${pngPath}`);
+      }
     }
   } else if (status === 'Inactive' && avatar) {
     throw new Error(`Inactive member has an avatar path: ${username}`);
@@ -79,7 +83,7 @@ if (inactiveCount > 0 && !readme.includes('### Inactive Members\n\n| Member | Em
 }
 
 for (const [, name, , status, , avatar] of profiles) {
-  if (status === 'Active' && !readme.includes(`(${avatar})`)) {
+  if (status === 'Active' && avatar && !readme.includes(`src="${avatar}" width="32" height="32" style="border-radius: 50%;"`)) {
     throw new Error(`README is missing the avatar for ${name}.`);
   }
 }

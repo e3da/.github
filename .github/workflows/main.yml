@@ -25,12 +25,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install image conversion dependency
-        run: npm ci
-
       - name: Generate Member Profiles
         env:
           GITHUB_TOKEN: ${{ secrets.YRPENG_E3DA_RO }}
+          UPDATE_AVATARS: ${{ github.event_name == 'workflow_dispatch' }}
         run: node scripts/update-members.js
 
       - name: Validate Member Profiles

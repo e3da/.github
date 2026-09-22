@@ -3,8 +3,8 @@ const path = require('path');
 const { PROFILES_HEADER, parseCsvLine } = require('./csv');
 
 // Fetch organization membership, preserve local profile data, and regenerate the
-// CSV and README. PNG files are preferred because they are refreshed dynamically;
-// local JPG files are temporary fallbacks used only when a PNG is unavailable.
+// CSV and README. Raw downloaded images are preferred; JPG files are resized
+// conversions used only when a raw image is not a PNG.
 const organization = 'e3da';
 const pageSize = 100;
 const root = path.resolve(__dirname, '..');
@@ -15,7 +15,7 @@ const headerPath = path.join(root, 'profile', 'RM-head.md');
 const token = process.env.GITHUB_TOKEN;
 // Scheduled runs update member metadata only; manual runs also refresh PNG sources.
 const updateAvatars = process.env.UPDATE_AVATARS === 'true';
-const pngAvatarDirectory = path.join(membersDirectory, 'avatars', 'png');
+const rawAvatarDirectory = path.join(membersDirectory, 'avatars', 'raw');
 const jpgAvatarDirectory = path.join(membersDirectory, 'avatars', 'jpg');
 
 async function github(pathname, parameters = {}) {
@@ -63,6 +63,12 @@ function normalizeLogin(login) {
   return String(login).toLowerCase();
 }
 
+function imageExtension(source) {
+  if (source.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return '.png';
+  if (source.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff]))) return '.jpg';
+  return '';
+}
+
 async function readExistingProfiles() {
   try {
     const content = await fs.readFile(csvPath, 'utf8');
@@ -85,13 +91,6 @@ async function readExistingProfiles() {
   }
 }
 
-async function fileExists(filePath) {
-  return fs.access(filePath).then(() => true).catch((error) => {
-    if (error.code === 'ENOENT') return false;
-    throw error;
-  });
-}
-
 async function findAvatarPath(directory, login, extension) {
   const normalizedName = `${normalizeLogin(login)}${extension}`;
   let names;
@@ -111,22 +110,25 @@ async function findAvatarPath(directory, login, extension) {
 async function downloadAvatar(user) {
   try {
     // Keep the original download separate from the locally generated JPG.
-    const response = await fetch(`https://github.com/${user.login}.png?size=64`, {
+    const response = await fetch(`https://github.com/${user.login}.png?size=128`, {
       headers: { 'User-Agent': 'e3da-member-profile-updater' }
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const source = Buffer.from(await response.arrayBuffer());
-    const pngPath = path.join(pngAvatarDirectory, `${user.login}.png`);
-    const previousSource = await fs.readFile(pngPath).catch((error) => {
+    const extension = imageExtension(source);
+    if (!extension) throw new Error('response is not PNG or JPEG');
+    const rawPath = path.join(rawAvatarDirectory, `${normalizeLogin(user.login)}${extension}`);
+    const previousSource = await fs.readFile(rawPath).catch((error) => {
       if (error.code === 'ENOENT') return null;
       throw error;
     });
     if (previousSource?.equals(source)) return true;
 
-    const temporaryPath = `${pngPath}.tmp`;
+    const temporaryPath = `${rawPath}.tmp`;
     await fs.writeFile(temporaryPath, source);
-    await fs.rename(temporaryPath, pngPath);
+    await fs.rename(temporaryPath, rawPath);
+    await fs.rm(path.join(rawAvatarDirectory, `${normalizeLogin(user.login)}${extension === '.png' ? '.jpg' : '.png'}`), { force: true });
     return true;
   } catch (error) {
     console.warn(`Warning: could not update avatar for ${user.login}: ${error.message}`);
@@ -135,14 +137,14 @@ async function downloadAvatar(user) {
 }
 
 async function avatarPath(login) {
-  const pngPath = await findAvatarPath(pngAvatarDirectory, login, '.png');
-  if (pngPath) {
-    return `members/avatars/png/${path.basename(pngPath)}`;
+  const rawPngPath = await findAvatarPath(rawAvatarDirectory, login, '.png');
+  if (rawPngPath) {
+    return `members/avatars/raw/${path.basename(rawPngPath)}`;
   }
 
-  const jpgPath = await findAvatarPath(jpgAvatarDirectory, login, '.jpg');
-  if (jpgPath) {
-    return `members/avatars/jpg/${path.basename(jpgPath)}`;
+  const rawJpgPath = await findAvatarPath(rawAvatarDirectory, login, '.jpg');
+  if (rawJpgPath) {
+    return `members/avatars/jpg/${normalizeLogin(login)}.jpg`;
   }
 
   return '';
@@ -156,7 +158,7 @@ async function main() {
   const existingProfiles = await readExistingProfiles();
   const profiles = new Map(existingProfiles);
   const activeLogins = new Set();
-  await fs.mkdir(pngAvatarDirectory, { recursive: true });
+  await fs.mkdir(rawAvatarDirectory, { recursive: true });
 
   for (const member of members) {
     const membership = await github(`/orgs/${organization}/memberships/${encodeURIComponent(member.login)}`);
@@ -185,7 +187,8 @@ async function main() {
       if (previousAvatar) {
         await fs.rm(path.join(root, 'profile', previousAvatar), { force: true });
       }
-      await fs.rm(path.join(pngAvatarDirectory, `${profile.username}.png`), { force: true });
+      await fs.rm(path.join(rawAvatarDirectory, `${profile.username}.png`), { force: true });
+      await fs.rm(path.join(rawAvatarDirectory, `${profile.username}.jpg`), { force: true });
       await fs.rm(path.join(jpgAvatarDirectory, `${profile.username}.jpg`), { force: true });
     }
   }

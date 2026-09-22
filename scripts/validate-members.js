@@ -45,22 +45,26 @@ function validateJpg(filePath) {
 
 async function validate() {
   for (const [username, , , status, , avatar] of profiles) {
-    if (!username || usernames.has(username)) throw new Error(`Invalid or duplicate username: ${username}`);
-    usernames.add(username);
+    const normalizedUsername = String(username || '').toLowerCase();
+    if (!normalizedUsername || usernames.has(normalizedUsername)) {
+      throw new Error(`Invalid or duplicate username: ${username}`);
+    }
+    usernames.add(normalizedUsername);
 
     if (status === 'Active') {
       if (avatar) {
-        const isPng = avatar.startsWith('members/avatars/png/') && avatar.endsWith('.png');
+        const isRawPng = avatar.startsWith('members/avatars/raw/') && avatar.endsWith('.png');
+        const isRawJpg = avatar.startsWith('members/avatars/raw/') && avatar.endsWith('.jpg');
         const isJpg = avatar.startsWith('members/avatars/jpg/') && avatar.endsWith('.jpg');
-        if (!isPng && !isJpg) {
+        if (!isRawPng && !isRawJpg && !isJpg) {
           console.warn(`Warning: invalid active avatar path for ${username}: ${avatar}`);
           continue;
         }
         const avatarPath = path.join(root, 'profile', avatar);
         if (!fs.existsSync(avatarPath) || fs.statSync(avatarPath).size === 0) {
           console.warn(`Warning: missing active avatar: ${avatarPath}`);
-        } else if (isPng ? !validatePng(avatarPath) : !validateJpg(avatarPath)) {
-          console.warn(`Warning: avatar is not a valid ${isPng ? 'PNG' : 'JPG'}: ${avatarPath}`);
+        } else if (isRawPng ? !validatePng(avatarPath) : !validateJpg(avatarPath)) {
+          console.warn(`Warning: avatar is not a valid ${isRawPng ? 'PNG' : 'JPG'}: ${avatarPath}`);
         }
       }
     } else if (status === 'Inactive' && avatar) {

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Convert PNG avatar sources to JPG, optionally as a complete Git transaction.
+# Convert raw avatar sources to 64x64 JPGs, optionally as a complete Git
+# transaction.
 # Mode 0 prints commands, mode 1 converts locally, mode 2 pulls and commits with
 # rollback/push, and mode 3 converts and validates without Git operations.
 
@@ -11,9 +12,9 @@ Usage: scripts/usr/bin/png2jpg.sh <mode>
 
 Modes:
   0  Dry run: print the ImageMagick commands without changing files.
-  1  Convert PNG avatars to JPG files locally.
+  1  Convert raw PNG and JPEG avatars locally.
   2  Pull origin/main, generate only missing JPGs, validate, commit, and push.
-  3  Convert avatars and validate without Git operations.
+  3  Convert raw PNG and JPEG avatars, and validate locally.
 
 Note: mode 2 restores the original commit and removes generated files if any
 step fails. Mode 3 leaves files as-is when a step fails and never pushes.
@@ -34,7 +35,7 @@ fi
 mode=$1
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 root_dir=$(cd -- "$script_dir/../../.." && pwd)
-source_dir="$root_dir/profile/members/avatars/png"
+source_dir="$root_dir/profile/members/avatars/raw"
 destination_dir="$root_dir/profile/members/avatars/jpg"
 
 if command -v magick >/dev/null 2>&1; then
@@ -53,25 +54,35 @@ convert_avatars() {
     mkdir -p "$destination_dir"
   fi
 
-  local source filename destination temporary
+  local source filename extension destination temporary
   local found_source=false
-  for source in "$source_dir"/*.png; do
+  for source in "$source_dir"/*; do
     [[ -f "$source" ]] || continue
     found_source=true
     filename=$(basename "$source" .png)
+    extension=${source##*.}
+    extension=${extension,,}
+    if [[ $extension != png && $extension != jpg && $extension != jpeg ]]; then
+      continue
+    fi
+    filename=$(basename "$source")
+    filename=${filename%.*}
     filename=${filename,,}
     destination="$destination_dir/$filename.jpg"
     temporary="$destination_dir/.$filename.jpg.tmp"
-    if [[ $mode == 2 && -f "$destination" ]]; then
+    if [[ -e "$destination" || -L "$destination" ]]; then
       continue
     fi
     if [[ $mode == 0 ]]; then
       printf '  %q' "${converter[@]}"
-      printf ' %q' "$source" -background white -alpha remove -alpha off -strip -quality 90 "jpg:$temporary"
+      printf ' %q' "$source" -resize '64x64^' -gravity center -extent 64x64 -background white -alpha remove -alpha off -strip -quality 90 "jpg:$temporary"
       printf '\n'
     fi
     if [[ $mode != 0 ]]; then
       "${converter[@]}" "$source" \
+        -resize '64x64^' \
+        -gravity center \
+        -extent 64x64 \
         -background white \
         -alpha remove \
         -alpha off \

@@ -107,6 +107,37 @@ async function findAvatarPath(directory, login, extension) {
   return matches.length === 1 ? path.join(directory, matches[0]) : '';
 }
 
+async function rawAvatarPaths(login) {
+  let names;
+  try {
+    names = await fs.readdir(rawAvatarDirectory);
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
+  const normalizedLogin = normalizeLogin(login);
+  return names
+    .filter((name) => {
+      const extension = path.extname(name).toLowerCase();
+      const basename = path.basename(name, path.extname(name)).toLowerCase();
+      return basename === normalizedLogin && ['.png', '.jpg', '.jpeg'].includes(extension);
+    })
+    .map((name) => path.join(rawAvatarDirectory, name));
+}
+
+async function assertUniqueRawAvatars() {
+  const names = await fs.readdir(rawAvatarDirectory);
+  const seen = new Map();
+  for (const name of names) {
+    const extension = path.extname(name).toLowerCase();
+    if (!['.png', '.jpg', '.jpeg'].includes(extension)) continue;
+    const basename = path.basename(name, path.extname(name)).toLowerCase();
+    const previous = seen.get(basename);
+    if (previous) throw new Error(`Duplicate raw avatar basename: ${previous} and ${name}`);
+    seen.set(basename, name);
+  }
+}
+
 async function downloadAvatar(user) {
   try {
     // Keep the original download separate from the locally generated JPG.
@@ -128,7 +159,9 @@ async function downloadAvatar(user) {
     const temporaryPath = `${rawPath}.tmp`;
     await fs.writeFile(temporaryPath, source);
     await fs.rename(temporaryPath, rawPath);
-    await fs.rm(path.join(rawAvatarDirectory, `${normalizeLogin(user.login)}${extension === '.png' ? '.jpg' : '.png'}`), { force: true });
+    for (const existingPath of await rawAvatarPaths(user.login)) {
+      if (existingPath !== rawPath) await fs.rm(existingPath, { force: true });
+    }
     return true;
   } catch (error) {
     console.warn(`Warning: could not update avatar for ${user.login}: ${error.message}`);
@@ -159,6 +192,7 @@ async function main() {
   const profiles = new Map(existingProfiles);
   const activeLogins = new Set();
   await fs.mkdir(rawAvatarDirectory, { recursive: true });
+  await assertUniqueRawAvatars();
 
   for (const member of members) {
     const membership = await github(`/orgs/${organization}/memberships/${encodeURIComponent(member.login)}`);

@@ -17,6 +17,21 @@ const profiles = csvLines.slice(1).map(parseCsvLine);
 const usernames = new Set();
 let inactiveCount = 0;
 
+function validateRawAvatarNames() {
+  const seen = new Map();
+  const rawDirectory = path.join(root, 'profile', 'members', 'avatars', 'raw');
+  if (!fs.existsSync(rawDirectory)) return;
+  for (const name of fs.readdirSync(rawDirectory)) {
+    const extension = path.extname(name).toLowerCase();
+    if (!['.png', '.jpg', '.jpeg'].includes(extension)) continue;
+    const basename = path.basename(name, path.extname(name)).toLowerCase();
+    if (seen.has(basename)) {
+      throw new Error(`Duplicate raw avatar basename: ${seen.get(basename)} and ${name}`);
+    }
+    seen.set(basename, name);
+  }
+}
+
 function validatePng(filePath) {
   try {
     // Validate the PNG when possible, but avatar quality must not block the update.
@@ -43,6 +58,7 @@ function validateJpg(filePath) {
 }
 
 async function validate() {
+  validateRawAvatarNames();
   for (const [username, , , status, , avatar] of profiles) {
     const normalizedUsername = String(username || '').toLowerCase();
     if (!normalizedUsername || usernames.has(normalizedUsername)) {

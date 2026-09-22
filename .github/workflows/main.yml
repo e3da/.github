@@ -4,10 +4,17 @@ on:
   schedule:
     # Saturday 19:40 UTC is 03:40 AM China Standard Time
     - cron: '40 19 * * 6'
-  workflow_dispatch: 
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: organization-profile-updater
+  cancel-in-progress: true
 
 jobs:
   update-members:
@@ -16,84 +23,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1 
+          fetch-depth: 1
 
-      - name: Generate Member Table
-        uses: actions/github-script@v9
-        with:
-          github-token: ${{ secrets.YRPENG_E3DA_RO }} 
-          script: |
-            const org = 'e3da';
-            const fs = require('fs');
-            
-            async function run() {
-              // 1. Fetch Members
-              const members = await github.paginate(github.rest.orgs.listMembers, {
-                org: org,
-                filter: 'all',
-                per_page: 100
-              });
-              
-              let memberRows = "| Member | Status | Portfolio |\n| :--- | :--- | :--- |\n";
-              let count = 0;
+      - name: Install image conversion dependency
+        run: npm ci
 
-              for (const member of members) {
-                const { data: membership } = await github.rest.orgs.getMembershipForUser({
-                  org,
-                  username: member.login
-                });
+      - name: Generate Member Profiles
+        env:
+          GITHUB_TOKEN: ${{ secrets.YRPENG_E3DA_RO }}
+        run: node scripts/update-members.js
 
-                if (membership.role === 'member') {
-                  const { data: user } = await github.rest.users.getByUsername({ username: member.login });
-                  const site = user.blog ? user.blog : `https://${user.login}.github.io`;
-                  const status = user.status?.emoji ? `${user.status.emoji} ${user.status.message || ''}` : "Active";
-                  
-                  memberRows += `| **${user.name || user.login}** | ${status} | [Visit Portfolio](${site}) |\n`;
-                  count++;
-                }
-              }
+      - name: Validate Member Profiles
+        run: node scripts/validate-members.js
 
-              if (count === 0) memberRows += "| No members found | - | - |\n";
-
-              // 2. Load Header and Compare
-              const headPath = 'profile/RM-head.md';
-              const readmePath = 'profile/README.md';
-
-              if (!fs.existsSync(headPath)) throw new Error("RM-head.md missing.");
-
-              const header = fs.readFileSync(headPath, 'utf8');
-              const newContent = `${header}\n\n${memberRows}\n\n*Last updated: ${new Date().toUTCString()} (via ubuntu-slim)*`;
-
-              // Check if file exists and compare content (ignoring the timestamp line for true data comparison)
-              if (fs.existsSync(readmePath)) {
-                const oldContent = fs.readFileSync(readmePath, 'utf8');
-                // We strip the "Last updated" line to see if the actual member data changed
-                const stripTime = (str) => str.split('*Last updated:')[0].trim();
-                
-                if (stripTime(oldContent) === stripTime(newContent)) {
-                  console.log("Member data remains unchanged. Skipping file write.");
-                  return; 
-                }
-              }
-
-              fs.writeFileSync(readmePath, newContent);
-              console.log("Changes detected. README.md updated locally.");
-            }
-
-            await run();
-
-      - name: Commit and Force Push
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add profile/README.md
-          
-          # Final safety check: if no changes are staged, do not push
+
+          git add profile/README.md profile/members/
+
           if git diff --staged --quiet; then
-            echo "No data changes detected. Skipping git push."
+            echo "No member data changes detected. Skipping git push."
             exit 0
           fi
 
-          git commit -m "chore: nightly member update (data change detected)"
-          git push origin main --force
+          git commit -m "chore: update member profiles"
+          git push origin main

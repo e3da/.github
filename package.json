@@ -1,0 +1,7 @@
+{
+  "name": "e3da-member-profile-updater",
+  "private": true,
+  "dependencies": {
+    "sharp": "^0.34.3"
+  }
+}

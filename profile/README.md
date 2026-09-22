@@ -10,19 +10,17 @@ Prof Peng has moved from University of Arkansas to Southeast University. For the
 ### Github Member Profiles 
 Here are the current members of E3DA Lab and their personal websites:
 
+| Headshot | Member | Email | Portfolio |
+| :---: | :--- | :--- | :--- |
+| ![Xinbo Zhou](members/avatars/jpg/jorychou.jpg) | [Xinbo Zhou](https://github.com/jorychou) | - | [https://jorychou.github.io](https://jorychou.github.io) |
+| ![Mingyu Zhang](members/avatars/jpg/mingyu-zhang717.jpg) | [Mingyu Zhang](https://github.com/mingyu-zhang717) | - | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
+| ![Mehran Sanjabiasasi](members/avatars/jpg/Msanjabi.jpg) | [Mehran Sanjabiasasi](https://github.com/Msanjabi) | - | [https://Msanjabi.github.io](https://Msanjabi.github.io) |
+| ![Qiuting Cai](members/avatars/jpg/Qiuting-Cai.jpg) | [Qiuting Cai](https://github.com/Qiuting-Cai) | - | [https://Qiuting-Cai.github.io](https://Qiuting-Cai.github.io) |
+| ![Bowen Wu](members/avatars/jpg/SynoFutis.jpg) | [Bowen Wu](https://github.com/SynoFutis) | - | [https://SynoFutis.github.io](https://SynoFutis.github.io) |
+| ![Yumeng Liu](members/avatars/jpg/ymliu01.jpg) | [Yumeng Liu](https://github.com/ymliu01) | - | [https://ymliu01.github.io](https://ymliu01.github.io) |
+| ![Yuxiang Huang](members/avatars/jpg/yx-huang-cn.jpg) | [Yuxiang Huang](https://github.com/yx-huang-cn) | - | [https://yx-huang-cn.github.io](https://yx-huang-cn.github.io) |
+| ![Zhuo Zhang](members/avatars/jpg/zhuo-zh.jpg) | [Zhuo Zhang](https://github.com/zhuo-zh) | - | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
+| ![Zhenyang Ma](members/avatars/jpg/zhy-Ma.jpg) | [Zhenyang Ma](https://github.com/zhy-Ma) | - | [https://zhy-Ma.github.io](https://zhy-Ma.github.io) |
+| ![Zongsheng Song](members/avatars/jpg/zongshengsong.jpg) | [Zongsheng Song](https://github.com/zongshengsong) | - | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
 
-| Member | Status | Portfolio |
-| :--- | :--- | :--- |
-| **Xinbo Zhou** | Active | [Visit Portfolio](https://jorychou.github.io) |
-| **Mingyu Zhang** | Active | [Visit Portfolio](https://mingyu-zhang717.github.io) |
-| **Mehran Sanjabiasasi** | Active | [Visit Portfolio](https://Msanjabi.github.io) |
-| **Qiuting Cai** | Active | [Visit Portfolio](https://Qiuting-Cai.github.io) |
-| **Bowen Wu** | Active | [Visit Portfolio](https://SynoFutis.github.io) |
-| **Yumeng Liu** | Active | [Visit Portfolio](https://ymliu01.github.io) |
-| **Yuxiang Huang** | Active | [Visit Portfolio](https://yx-huang-cn.github.io) |
-| **Zhuo Zhang** | Active | [Visit Portfolio](https://zhuo-zh.github.io) |
-| **Zhenyang Ma** | Active | [Visit Portfolio](https://zhy-Ma.github.io) |
-| **Zongsheng Song** | Active | [Visit Portfolio](https://zongshengsong.github.io) |
-
-
-*Last updated: Sat, 22 Aug 2026 19:46:04 GMT (via ubuntu-slim)*
+*Last updated: Tue, 22 Sep 2026 14:15:57 GMT (via ubuntu-slim)*

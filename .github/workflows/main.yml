@@ -32,15 +32,13 @@ jobs:
           UPDATE_AVATARS: ${{ github.event_name == 'workflow_dispatch' }}
         run: node scripts/update-members.js
 
-      - name: Install ImageMagick for JPG fallback
+      - name: Install sharp for JPG fallback
         if: github.event_name == 'workflow_dispatch' && !hashFiles('profile/members/avatars/jpg/**')
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick
+        run: npm install --no-save --no-package-lock sharp
 
       - name: Generate JPG fallbacks
         if: github.event_name == 'workflow_dispatch' && !hashFiles('profile/members/avatars/jpg/**')
-        run: scripts/usr/bin/png2jpg.sh 1
+        run: node scripts/png2jpg.js
 
       - name: Refresh profile image references
         if: github.event_name == 'workflow_dispatch' && hashFiles('profile/members/avatars/jpg/**')
@@ -50,6 +48,12 @@ jobs:
 
       - name: Validate Member Profiles
         run: node scripts/validate-members.js
+
+      # JPGs are temporary manual-run artifacts. Removing them before the commit
+      # keeps the next manual run eligible for conversion and leaves PNG sources
+      # as the only committed avatar format.
+      - name: Remove temporary JPG fallbacks
+        run: rm -rf profile/members/avatars/jpg
 
       - name: Commit and Push
         run: |

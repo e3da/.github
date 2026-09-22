@@ -4,7 +4,7 @@ const { PROFILES_HEADER, parseCsvLine } = require('./csv');
 
 // Fetch organization membership, preserve local profile data, and regenerate the
 // CSV and README. PNG files are preferred because they are refreshed dynamically;
-// local JPG files are used only when a PNG is unavailable.
+// local JPG files are temporary fallbacks used only when a PNG is unavailable.
 const organization = 'e3da';
 const pageSize = 100;
 const root = path.resolve(__dirname, '..');

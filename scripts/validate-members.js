@@ -4,6 +4,7 @@ const { PROFILES_HEADER, parseCsvLine } = require('./csv');
 
 // Validate profile structure, referenced avatar files, and generated README tables.
 const root = path.resolve(__dirname, '..');
+const profileDirectory = path.join(root, 'profile');
 const csvPath = path.join(root, 'profile', 'members', 'profiles.csv');
 const readmePath = path.join(root, 'profile', 'README.md');
 const csvLines = fs.readFileSync(csvPath, 'utf8').trim().split('\n');
@@ -21,7 +22,9 @@ function validateRawAvatarNames() {
   const seen = new Map();
   const rawDirectory = path.join(root, 'profile', 'members', 'avatars', 'raw');
   if (!fs.existsSync(rawDirectory)) return;
-  for (const name of fs.readdirSync(rawDirectory)) {
+  for (const entry of fs.readdirSync(rawDirectory, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const name = entry.name;
     const extension = path.extname(name).toLowerCase();
     if (!['.png', '.jpg', '.jpeg'].includes(extension)) continue;
     const basename = path.basename(name, path.extname(name)).toLowerCase();
@@ -68,18 +71,23 @@ async function validate() {
 
     if (status === 'Active') {
       if (avatar) {
-        const isRawPng = avatar.startsWith('members/avatars/raw/') && avatar.endsWith('.png');
-        const isRawJpg = avatar.startsWith('members/avatars/raw/') && avatar.endsWith('.jpg');
-        const isJpg = avatar.startsWith('members/avatars/jpg/') && avatar.endsWith('.jpg');
+        const isRawPng = avatar.startsWith('members/avatars/raw/') && /\.png$/i.test(avatar);
+        const isRawJpg = avatar.startsWith('members/avatars/raw/') && /\.jpe?g$/i.test(avatar);
+        const isJpg = avatar.startsWith('members/avatars/jpg/') && /\.jpg$/i.test(avatar);
         if (!isRawPng && !isRawJpg && !isJpg) {
-          console.warn(`Warning: invalid active avatar path for ${username}: ${avatar}`);
-          continue;
+          throw new Error(`Invalid active avatar path for ${username}: ${avatar}`);
         }
-        const avatarPath = path.join(root, 'profile', avatar);
+        const avatarPath = path.resolve(profileDirectory, avatar);
+        const relativeAvatarPath = path.relative(profileDirectory, avatarPath);
+        if (relativeAvatarPath === '..' || relativeAvatarPath.startsWith(`..${path.sep}`) || path.isAbsolute(relativeAvatarPath)) {
+          throw new Error(`Active avatar path escapes the profile directory: ${avatar}`);
+        }
         if (!fs.existsSync(avatarPath) || fs.statSync(avatarPath).size === 0) {
-          console.warn(`Warning: missing active avatar: ${avatarPath}`);
+          if (isJpg) throw new Error(`Missing generated JPG fallback: ${avatarPath}`);
+          console.warn(`Warning: missing raw avatar: ${avatarPath}`);
         } else if (isRawPng ? !validatePng(avatarPath) : !validateJpg(avatarPath)) {
-          console.warn(`Warning: avatar is not a valid ${isRawPng ? 'PNG' : 'JPG'}: ${avatarPath}`);
+          if (isJpg) throw new Error(`Invalid generated JPG fallback: ${avatarPath}`);
+          console.warn(`Warning: raw avatar is not a valid ${isRawPng ? 'PNG' : 'JPG'}: ${avatarPath}`);
         }
       }
     } else if (status === 'Inactive' && avatar) {
@@ -101,7 +109,7 @@ async function validate() {
 
   for (const [, name, , status, , avatar] of profiles) {
     if (status === 'Active' && avatar && !readme.includes(`src="${avatar}" width="32" height="32" style="border-radius: 50%;"`)) {
-      console.warn(`Warning: README is missing the avatar for ${name}.`);
+      throw new Error(`README is missing the avatar reference for ${name}.`);
     }
   }
 

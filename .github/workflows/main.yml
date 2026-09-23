@@ -32,10 +32,16 @@ jobs:
           UPDATE_AVATARS: ${{ github.event_name == 'workflow_dispatch' }}
         run: node scripts/update-members.js
 
+      - name: Check JPG fallback coverage
+        id: jpg-fallbacks
+        run: echo "needed=$(node scripts/png2jpg.js --check)" >> "$GITHUB_OUTPUT"
+
       - name: Install sharp for JPG fallback
+        if: steps.jpg-fallbacks.outputs.needed == 'true'
         run: npm install --no-save --no-package-lock sharp
 
       - name: Generate JPG fallbacks
+        if: steps.jpg-fallbacks.outputs.needed == 'true'
         run: node scripts/png2jpg.js
 
       - name: Refresh profile image references

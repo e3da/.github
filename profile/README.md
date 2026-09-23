@@ -14,7 +14,7 @@ Here are the current members of E3DA Lab and their personal websites:
 | :---: | :--- | :--- |
 | <img src="members/avatars/raw/synofutis.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Bowen Wu](https://github.com/synofutis)** | [https://synofutis.github.io](https://synofutis.github.io) |
 | <img src="members/avatars/jpg/msanjabi.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mehran Sanjabiasasi](https://github.com/msanjabi)** | [https://msanjabi.github.io](https://msanjabi.github.io) |
-| <img src="members/avatars/raw/mingyu-zhang717.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mingyu Zhang](https://github.com/mingyu-zhang717)** | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
+| <img src="members/avatars/jpg/mingyu-zhang717.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Mingyu Zhang](https://github.com/mingyu-zhang717)** | [https://mingyu-zhang717.github.io](https://mingyu-zhang717.github.io) |
 | <img src="members/avatars/jpg/qiuting-cai.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Qiuting Cai](https://github.com/qiuting-cai)** | [https://qiuting-cai.github.io](https://qiuting-cai.github.io) |
 | <img src="members/avatars/jpg/jorychou.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Xinbo Zhou](https://github.com/jorychou)** | [https://jorychou.github.io](https://jorychou.github.io) |
 | <img src="members/avatars/jpg/ymliu01.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yumeng Liu](https://github.com/ymliu01)** | [https://ymliu01.github.io](https://ymliu01.github.io) |
@@ -23,4 +23,4 @@ Here are the current members of E3DA Lab and their personal websites:
 | <img src="members/avatars/jpg/zhuo-zh.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhuo Zhang](https://github.com/zhuo-zh)** | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
 | <img src="members/avatars/jpg/zongshengsong.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zongsheng Song](https://github.com/zongshengsong)** | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
 
-*Last updated: Tue, 22 Sep 2026 20:53:39 GMT (via ubuntu-slim)*
+*Last updated: Wed, 23 Sep 2026 18:14:02 GMT (via ubuntu-slim)*

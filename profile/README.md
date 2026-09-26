@@ -23,4 +23,4 @@ Here are the current members of E3DA Lab and their personal websites:
 | <img src="members/avatars/jpg/zhuo-zh.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhuo Zhang](https://github.com/zhuo-zh)** | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
 | <img src="members/avatars/jpg/zongshengsong.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zongsheng Song](https://github.com/zongshengsong)** | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
 
-*Last updated: Wed, 23 Sep 2026 18:14:02 GMT (via ubuntu-slim)*
+*Last updated: Sat, 26 Sep 2026 19:42:48 GMT (via ubuntu-slim)*

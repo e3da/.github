@@ -19,8 +19,8 @@ Here are the current members of E3DA Lab and their personal websites:
 | <img src="members/avatars/jpg/jorychou.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Xinbo Zhou](https://github.com/jorychou)** | [https://jorychou.github.io](https://jorychou.github.io) |
 | <img src="members/avatars/jpg/ymliu01.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yumeng Liu](https://github.com/ymliu01)** | [https://ymliu01.github.io](https://ymliu01.github.io) |
 | <img src="members/avatars/jpg/yx-huang-cn.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Yuxiang Huang](https://github.com/yx-huang-cn)** | [https://yx-huang-cn.github.io](https://yx-huang-cn.github.io) |
-| <img src="members/avatars/raw/zhy-ma.png" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhenyang Ma](https://github.com/zhy-ma)** | [https://zhy-ma.github.io](https://zhy-ma.github.io) |
+| <img src="members/avatars/jpg/zhy-ma.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhenyang Ma](https://github.com/zhy-ma)** | [https://zhy-ma.github.io](https://zhy-ma.github.io) |
 | <img src="members/avatars/jpg/zhuo-zh.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zhuo Zhang](https://github.com/zhuo-zh)** | [https://zhuo-zh.github.io](https://zhuo-zh.github.io) |
 | <img src="members/avatars/jpg/zongshengsong.jpg" width="32" height="32" style="border-radius: 50%;" alt="Profile Image"> | **[Zongsheng Song](https://github.com/zongshengsong)** | [https://zongshengsong.github.io](https://zongshengsong.github.io) |
 
-*Last updated: Sat, 10 Oct 2026 19:44:11 GMT (via ubuntu-slim)*
+*Last updated: Wed, 14 Oct 2026 15:19:37 GMT (via ubuntu-slim)*
